@@ -213,18 +213,7 @@ class RegisterPage extends StatelessWidget {
   }
 }
 
-// 把用户注册的账号密码储存到本地
-1. 打开终端;
-2. cd /flutter文件的位置/
-3. 打开‘pubspec.yaml’ 文件, 在里面添加
-dependencies:
-  flutter:
-    sdk: flutter
-  shared_preferences: ^2.0.6
-4. 保存;
-5. 终端中输入flutter pub get, 然后就会自动下载安装包, 用来储存数据到本地
-
-
+========================================================================================================
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
