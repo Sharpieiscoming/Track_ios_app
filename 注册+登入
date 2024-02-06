@@ -214,6 +214,7 @@ class RegisterPage extends StatelessWidget {
 }
 
 ========================================================================================================
+版本二:试图把用户名和密码进行本地存储--失败
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
