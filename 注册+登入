@@ -212,3 +212,263 @@ class RegisterPage extends StatelessWidget {
     users.add(newUser);
   }
 }
+
+// 把用户注册的账号密码储存到本地
+1. 打开终端;
+2. cd /flutter文件的位置/
+3. 打开‘pubspec.yaml’ 文件, 在里面添加
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: ^2.0.6
+4. 保存;
+5. 终端中输入flutter pub get, 然后就会自动下载安装包, 用来储存数据到本地
+
+
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
+class User {
+  String username;
+  String password;
+
+  User({required this.username, required this.password});
+}
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  // 将用户列表提升到 MyApp 类中
+  List<User> users = [
+    User(username: 'user1', password: 'password1'),
+    User(username: 'user2', password: 'password2'),
+    // 添加更多用户...
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: '用户登录',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: LoginPage(users: users), // 将用户列表传递给 LoginPage
+    );
+  }
+}
+
+class LoginPage extends StatefulWidget {
+  final List<User> users; // 接收用户列表
+
+  LoginPage({required this.users});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  TextEditingController _usernameController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('用户登录'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: _usernameController,
+              decoration: InputDecoration(labelText: '用户名'),
+            ),
+            SizedBox(height: 16.0),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(labelText: '密码'),
+              obscureText: true,
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                // 在这里处理登录逻辑
+                String username = _usernameController.text;
+                String password = _passwordController.text;
+
+                // 进行用户名和密码验证等操作
+                if (validateUser(username, password)) {
+                  // 登录成功，导航到主页
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => HomeScreen(),
+                    ),
+                  );
+                } else {
+                  // 登录失败，显示错误消息
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('用户名或密码错误'),
+                    ),
+                  );
+                }
+              },
+              child: Text('登录'),
+            ),
+            SizedBox(height: 8.0),
+            TextButton(
+              onPressed: () {
+                // 导航到注册页面，传递用户列表
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => RegisterPage(users: widget.users),
+                  ),
+                );
+              },
+              child: Text('没有账户？点击注册'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 实现用户验证逻辑
+  bool validateUser(String username, String password) {
+    for (User user in widget.users) {
+      if (user.username == username && user.password == password) {
+        return true;  // 用户验证成功
+      }
+    }
+    return false;  // 用户验证失败
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('主页'),
+      ),
+      body: Center(
+        child: Text('欢迎来到主页！'),
+      ),
+    );
+  }
+}
+
+// 添加注册页面
+class RegisterPage extends StatelessWidget {
+  final List<User> users; // 接收用户列表
+  TextEditingController _newUsernameController = TextEditingController();
+  TextEditingController _newPasswordController = TextEditingController();
+
+  RegisterPage({required this.users});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('用户注册'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            TextField(
+              controller: _newUsernameController,
+              decoration: InputDecoration(labelText: '新用户名'),
+            ),
+            SizedBox(height: 16.0),
+            TextField(
+              controller: _newPasswordController,
+              decoration: InputDecoration(labelText: '新密码'),
+              obscureText: true,
+            ),
+            SizedBox(height: 16.0),
+            ElevatedButton(
+              onPressed: () {
+                // 在这里处理注册逻辑
+                String newUsername = _newUsernameController.text;
+                String newPassword = _newPasswordController.text;
+
+                // 检查用户名是否已存在
+                if (userExists(newUsername)) {
+                  // 用户名已存在，显示错误消息
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('用户名已存在，请选择其他用户名'),
+                    ),
+                  );
+                } else {
+                  // 添加新用户到数据库
+                  _addNewUser(newUsername, newPassword);
+
+                  // 注册成功，返回到登录页面
+                  Navigator.pop(context);
+                }
+              },
+              child: Text('注册'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 检查用户是否已存在
+  bool userExists(String username) {
+    for (User user in users) {
+      if (user.username == username) {
+        return true;  // 用户名已存在
+      }
+    }
+    return false;  // 用户名不存在
+  }
+
+  // 添加新用户到数据库
+  void _addNewUser(String username, String password) async {
+    User newUser = User(username: username, password: password);
+    users.add(newUser);
+
+  // 保存用户信息到本地存储中
+    await _saveUserList(users);
+}
+
+// // 使用 shared_preferences 保存用户数据
+//   Future<void> _saveUserList(List<User> users) async {
+//     SharedPreferences prefs = await SharedPreferences.getInstance();
+//     List<String> userList = users.map((user) => '${user.username}:${user.password}').toList();
+//     await prefs.setStringList('userList', userList);
+// }
+// // 读取用户列表数据
+//   Future<void> _readUserList() async {
+//     SharedPreferences prefs = await SharedPreferences.getInstance();
+//     List<String>? userList = prefs.getStringList('userList');
+
+//     if (userList != null) {
+//       // 解析用户列表数据
+//       List<User> users = userList.map((userInfo) {
+//         List<String> userInfoSplit = userInfo.split(':');
+//         return User(username: userInfoSplit[0], password: userInfoSplit[1]);
+//       }).toList();
+
+//       // 在这里处理获取到的用户列表数据
+//       print('用户列表：');
+//       users.forEach((user) {
+//         print('用户名: ${user.username}, 密码: ${user.password}');
+//       });
+//     } else {
+//       print('未找到用户列表');
+//     }
+//   }
+}
