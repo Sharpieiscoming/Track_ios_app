@@ -3,5 +3,6 @@
 2. repository
 3. 
 
-Q1:main branch是什么?
-A1: 
+Q1:main branch是什么?branch?
+A1:程序的主干(通常是不允许修改的), 于是引出了branch概念.
+
